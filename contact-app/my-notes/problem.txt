@@ -1,0 +1,2 @@
+replace the package.json & package-lcok.josn file from git source code 
+delete the node_module file & run npm i

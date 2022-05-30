@@ -1,0 +1,14 @@
+{
+  "contacts":[
+    {
+      "id":"dd32af05-7b35-4e1a-8a8d-eda4e4732f98",
+      "name":"Md.Samiul Haque",
+      "email":"dev.samiul99@gmail.com"
+    },
+    {
+      "id":"c48ae87d-5309-4cb4-9896-903cb54ad268",
+      "name":"Natasha Sinha",
+      "email":"natasha@mail.com"
+    }
+  ]
+}
