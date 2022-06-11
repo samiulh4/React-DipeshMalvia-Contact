@@ -5,6 +5,7 @@ import Header from './Header';
 import AddContact from './AddContact';
 import ContactList from './ContactList';
 import ContactDetails from './ContactDetails';
+import EditContact from './EditContact';
 //import { uuid } from "uuidv4";
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import api from '../api/contacts';
@@ -16,27 +17,51 @@ function App() {
 
   const LOCAL_STORAGE_KEY = "contacts";
   const [contacts, setContacts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchReslts] = useState([]);
 
+  const searchHandler = (searchTerm) => {
+    //console.log(searchTerm);
+    setSearchTerm(searchTerm);
+    if(searchTerm !== ""){
+      const newContactList = contacts.filter((contact) =>{
+        return Object.values(contact).join(" ").toLowerCase().includes(searchTerm.toLowerCase());
+      });
+      setSearchReslts(newContactList);
+    }else{
+      setSearchReslts (contacts);
+    }
+  };
 
   // RetrieveContacts
-  const retriveContacts = async () =>{
+  const retriveContacts = async () => {
     const response = await api.get('/');
     return response.data;
   };
 
   const addContactHandler = async (contact) => {
     //setContacts([...contacts, { id: uuid(), ...contact }]);
-    
     //setContacts([...contacts, { id: uuidv4(), ...contact }]);
+    
     const request = {
       id: uuidv4(),
       ...contact
     }
-    const response  = await api.post('/', request);
+    const response = await api.post('/', request);
     setContacts([...contacts, response.data]);
   };
 
-  const removeContactHandler = (id) => {
+  const updateContactHandler = async (contact) => {
+    const response = await api.put(`/${contact.id}`, contact);
+    const {id, name, email} = response.data;
+    console.log(response.data);
+    setContacts(contacts.map(contact =>{
+      return contact.id === id ? {...response.data}: contact;
+    }));
+  };
+
+  const removeContactHandler = async (id) => {
+    await api.delete(`/${id}`);
     const newContactList = contacts.filter((contact) => {
       return contact.id !== id;
     });
@@ -48,7 +73,7 @@ function App() {
     //if (retriveContacts) setContacts(retriveContacts);
     const getAllContact = async () => {
       const allContact = await retriveContacts();
-      if(allContact) setContacts(allContact);
+      if (allContact) setContacts(allContact);
     };
     getAllContact();
   }, []);
@@ -71,8 +96,9 @@ function App() {
       <Router>
         <Header />
         <Switch>
-          <Route path="/" exact render={(props) => (<ContactList {...props} contacts={contacts} getContactId={removeContactHandler} />)} />
+          <Route path="/" exact render={(props) => (<ContactList {...props} contacts={searchTerm.length < 1 ? contacts : searchResults} getContactId={removeContactHandler} term={searchTerm} searchKeyword={searchHandler} />)}/>
           <Route path="/add" render={(props) => (<AddContact {...props} addContactHandler={addContactHandler} />)} />
+          <Route path="/edit" render={(props) => (<EditContact {...props} updateContactHandler={updateContactHandler} />)} />
           <Route path="/contact/:id" component={ContactDetails} />
         </Switch>
         {/* 
